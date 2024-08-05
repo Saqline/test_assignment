@@ -24,12 +24,12 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 void onUpdateProductQuantity(UpdateProductQuantityEvent event, Emitter<ProductState> emit) async {
     if (state is ProductLoaded) {
       try {
-        final currentState = state as ProductLoaded;
-        final updatedProducts = currentState.products.map((product) {
-          return product.id == event.product.id
-              ? product.copyWith(quantity: event.quantity)
-              : product;
-        }).toList();
+        print("quantity: ${event.quantity}");
+         final updatedProducts = (state as ProductLoaded).products.map((product) {
+        return product.id == event.product.id
+            ? product.copyWith(quantity: event.quantity)
+            : product;
+      }).toList();
         print(updatedProducts[0].quantity);
         emit(ProductLoaded(updatedProducts));
       } catch (e) {

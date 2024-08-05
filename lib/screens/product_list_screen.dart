@@ -7,13 +7,12 @@ import '../blocs/auth/auth_bloc.dart';
 import '../blocs/product/product_bloc.dart';
 import '../blocs/product/product_event.dart';
 import '../blocs/product/product_state.dart';
-
 import '../models/product.dart';
-import '../widgets/product_item.dart'; // Import for number formatting
+import '../widgets/product_item.dart';
 
 class ProductListScreen extends StatefulWidget {
   ProductListScreen({required this.token});
-  String token;
+  final String token;
 
   @override
   State<ProductListScreen> createState() => _ProductListScreenState();
@@ -39,12 +38,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocProvider(
-              create: (context) => ProductBloc(ProductRepository())
-                ..add(FetchProductsEvent(token: widget.token)),
+      body: BlocProvider(
+        create: (context) => ProductBloc(ProductRepository())
+          ..add(FetchProductsEvent(token: widget.token)),
+        child: Column(
+          children: [
+            Expanded(
               child: BlocBuilder<ProductBloc, ProductState>(
                 builder: (context, state) {
                   if (state is ProductLoading) {
@@ -68,59 +67,36 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 },
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: BlocProvider(
-              create: (context) => ProductBloc(ProductRepository())
-                //..add(UpdateProductQuantityEvent(product: Product(), quantity: 0))
-                ..add(FetchProductsEvent(token: widget.token)),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: BlocBuilder<ProductBloc, ProductState>(
                 builder: (context, state) {
                   if (state is ProductLoaded) {
+                    if (state.products.isEmpty) {
+                      return Center(child: Text("No Checkout available"));
+                    }
                     double totalPrice = 0;
-                    // for (var product in state.products) {
-                    //   // Debug print statements
-                    //   print(
-                    //       'Product: ${product.name}, Price: ${product.price}, Quantity: ${product.quantity}');
-                    //   if (product.price != null &&
-                    //       double.tryParse(product.price!) != null) {
-                    //     totalPrice +=
-                    //         product.quantity * double.parse(product.price!);
-                    //   } 
-                    // }
-
+                    for (var product in state.products) {
+                      if (product.price != null && double.tryParse(product.price!) != null) {
+                        totalPrice += product.quantity * double.parse(product.price!);
+                      }
+                    }
                     return ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                        });
-                        for (var product in state.products) {
-                      // Debug print statements
-                      print(
-                          'Product: ${product.name}, Price: ${product.price}, Quantity: ${product.quantity}');
-                      if (product.price != null &&
-                          double.tryParse(product.price!) != null) {
-                        totalPrice +=
-                            product.quantity * double.parse(product.price!);
-                            print("Total Price: $totalPrice");
-                      } 
-                    }
-                     setState(() {
-                        });
-                        showdialog(context, totalPrice);
+                        showdialog(context, state.products, totalPrice);
                       },
                       child: Text('Checkout - \$$totalPrice'),
                     );
                   } else if (state is ProductInitial) {
-                    return Center(child: Text("No products available"));
+                    return Center(child: Text("No Checkout available"));
                   } else {
                     return const Center(child: Text('Checkout'));
                   }
                 },
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -140,10 +116,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
           child: Text('Logout'),
           onPressed: () {
             BlocProvider.of<AuthBloc>(context).add(LogoutEvent(token: widget.token));
-            Navigator.of(context).pushReplacement(
+            Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                builder: (context) => LoginScreen(),
+              builder: (context) => LoginScreen(),
               ),
+              (Route<dynamic> route) => false,
             );
           },
         ),
@@ -151,31 +128,52 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  Future<dynamic> showdialog(BuildContext context, double totalPrice) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Checkout'),
-          content: Text('Total price: ${totalPrice}'),
-          actions: [
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Confirm'),
-              onPressed: () {
-                print(totalPrice);
-                // Navigate to checkout or confirm the order
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
+  Future<dynamic> showdialog(BuildContext context, List<Product> products, double totalPrice) {
+  final filteredProducts = products.where((product) => product.quantity > 0).toList();
+
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Checkout'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...filteredProducts.map((product) {
+                double productTotalPrice = product.quantity * double.parse(product.price!);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Text(
+                    '${product.name}: ${product.quantity} x \$${product.price} = \$${productTotalPrice.toStringAsFixed(2)}',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                );
+              }).toList(),
+              Divider(),
+              Text(
+                'Total price: \$${totalPrice.toStringAsFixed(2)}',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text('Confirm'),
+            onPressed: () {
+              print(totalPrice);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}}
