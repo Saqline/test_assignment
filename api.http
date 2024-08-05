@@ -1,0 +1,19 @@
+@token=1437|5Mm6Q9OLQand8Z4Ld6ez5x5C8OzBaWTglm1LMg7x
+### login
+POST  https://demo.limerickbd.com/backend/public/api/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "admin@gmail.com",
+    "password": "12345678"
+}
+
+
+### get all product
+GET https://demo.limerickbd.com/backend/public/api/fg-with-stock HTTP/1.1
+Authorization : Bearer {{token}}
+
+### 
+POST https://demo.limerickbd.com/backend/public/api/logout HTTP/1.1
+Authorization : Bearer {{token}}
+
