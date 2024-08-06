@@ -6,13 +6,20 @@ import '../blocs/auth/auth_event.dart';
 import '../blocs/auth/auth_state.dart';
 
 class LoginScreen extends StatelessWidget {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+   final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  // @override
+  // void dispose() {
+  //   _usernameController.dispose();
+  //   _passwordController.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: BlocConsumer<AuthBloc, AuthState>(
@@ -35,17 +42,30 @@ class LoginScreen extends StatelessWidget {
               return Center(child: CircularProgressIndicator());
             }
             return Column(
+               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(labelText: 'Username'),
-                ),
-                TextField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                ),
-                SizedBox(height: 20),
+                  const Text(
+              'প্রবেশ করুন',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _usernameController,
+              decoration: const InputDecoration(labelText: 'ইমেইল'),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'পাসওয়ার্ড'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 20),
+            CheckboxListTile(
+              title: const Text('আমি শর্তাবলী এবং গোপনীয়তা নীতি সম্পর্কে সচেতন'),
+              value: true,
+              onChanged: (value) {},
+            ),
+            const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     final username = _usernameController.text;
@@ -53,7 +73,7 @@ class LoginScreen extends StatelessWidget {
                     BlocProvider.of<AuthBloc>(context)
                         .add(LoginEvent(username, password));
                   },
-                  child: Text('Login'),
+                  child: const Text('প্রবেশ ইন করুন'),
                 ),
               ],
             );

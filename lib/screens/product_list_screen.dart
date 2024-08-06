@@ -88,7 +88,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       child: Text('Checkout - \$$totalPrice'),
                     );
                   } else if (state is ProductInitial) {
-                    return Center(child: Text("No Checkout available"));
+                    return Center(child: Text("Checkout"));
                   } else {
                     return const Center(child: Text('Checkout'));
                   }
@@ -135,45 +135,72 @@ class _ProductListScreenState extends State<ProductListScreen> {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Checkout'),
+        title: const Text('চেকআউট নিশ্চিত করুন'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...filteredProducts.map((product) {
-                double productTotalPrice = product.quantity * double.parse(product.price!);
+                double productTotalPrice =
+                    product.quantity * double.parse(product.price!);
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Text(
-                    '${product.name}: ${product.quantity} x \$${product.price} = \$${productTotalPrice.toStringAsFixed(2)}',
-                    style: TextStyle(fontSize: 16),
+                  child: Wrap(
+                    children: [
+                      Text(
+                        '${product.name} (${product.quantity}x${product.price})',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        '৳${productTotalPrice.toStringAsFixed(2)}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ],
                   ),
                 );
               }).toList(),
-              Divider(),
-              Text(
-                'Total price: \$${totalPrice.toStringAsFixed(2)}',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              const Divider(),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'মোট',
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '৳${totalPrice.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ],
           ),
         ),
         actions: [
           TextButton(
-            child: Text('Cancel'),
             onPressed: () {
               Navigator.of(context).pop();
             },
+            child: const Text('অডিট'),
           ),
           TextButton(
-            child: Text('Confirm'),
             onPressed: () {
               print(totalPrice);
               Navigator.of(context).pop();
             },
+            child: const Text('নিশ্চিত করুন'),
           ),
         ],
       );
     },
   );
-}}
+}
+
+
+
+
+}
+

@@ -17,47 +17,50 @@ class _ProductItemState extends State<ProductItem> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(widget.product.name ?? 'Unnamed Product'),
-      subtitle: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Price: \$${widget.product.price ?? 'N/A'}'),
-          Text('Pack Size: ${widget.product.packSize}'),
-          Text('Stock: ${widget.product.stock ?? 'N/A'}')
-        ],
+    return Card(
+      shape: ShapeBorder.lerp(null, null, 0),
+      child: ListTile(
+        title: Text(widget.product.name ?? 'Unnamed Product'),
+        subtitle: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Price: \$${widget.product.price ?? 'N/A'}'),
+            Text('Pack Size: ${widget.product.packSize}'),
+            Text('Stock: ${widget.product.stock ?? 'N/A'}')
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.remove),
+              onPressed: _quantity > 0
+                  ? () {
+                      setState(() {
+                        _quantity--;
+                        BlocProvider.of<ProductBloc>(context).add(UpdateProductQuantityEvent(product: widget.product, quantity: _quantity));
+                      });
+                    }
+                  : null,
+            ),
+            Text(_quantity.toString()),
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: 
+             // widget.product.stock != null && widget.product.stock! > _quantity? 
+                  () {
+                      setState(() {
+                        _quantity++;
+                        BlocProvider.of<ProductBloc>(context).add(UpdateProductQuantityEvent(product: widget.product, quantity: _quantity));
+                      });
+                    }
+                  //: null,
+            ),
+          ],
+        ),
+       
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: Icon(Icons.remove),
-            onPressed: _quantity > 0
-                ? () {
-                    setState(() {
-                      _quantity--;
-                      BlocProvider.of<ProductBloc>(context).add(UpdateProductQuantityEvent(product: widget.product, quantity: _quantity));
-                    });
-                  }
-                : null,
-          ),
-          Text(_quantity.toString()),
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: 
-           // widget.product.stock != null && widget.product.stock! > _quantity? 
-                () {
-                    setState(() {
-                      _quantity++;
-                      BlocProvider.of<ProductBloc>(context).add(UpdateProductQuantityEvent(product: widget.product, quantity: _quantity));
-                    });
-                  }
-                //: null,
-          ),
-        ],
-      ),
-     
     );
   }
 }
